@@ -1,0 +1,6 @@
+{
+  "first-purchase-popup": {
+    "component": "FirstPurchase",
+    "render": "client"
+  }
+}
