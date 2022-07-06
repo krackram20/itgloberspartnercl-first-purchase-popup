@@ -1,11 +1,15 @@
 
-
-query {
-
-  users (perPage:100 pageNumber: 1) {
-    data {
-      email
-      }
+query($email: String){ 
+  documents(
+    acronym:"CL",
+    fields:["email"],
+    where: $email
+  ) {
+    id,
+    fields {
+      key,
+      value
     }
   }
+}
 

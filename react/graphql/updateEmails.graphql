@@ -1,0 +1,9 @@
+mutation UPDATE_EMAILS($document:DocumentInput){
+  createDocument(
+    acronym: "CL",
+    document: $document
+  ) {
+    id
+  }
+
+}

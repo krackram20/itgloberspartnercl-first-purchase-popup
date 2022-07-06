@@ -2,33 +2,46 @@ import React, { useState, useEffect } from 'react'
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import './styles.css'
- import QUERY_VALUE from '../graphql/getEmails.graphql'
- import { useQuery} from 'react-apollo'
+ import FIND_EMAIL from '../graphql/getEmails.graphql'
+ import UPDATE_EMAILS from '../graphql/updateEmails.graphql'
+ import { useLazyQuery, useMutation} from 'react-apollo'
 
 
 
 const FirstPurchase = () => {
 
-
-
   const [email, setEmail] = useState("")
 
-   const {data, error} = useQuery(QUERY_VALUE)
+  const [createDocument] = useMutation(UPDATE_EMAILS)
 
-   let emails: any[] = []
-
-   if(data) {
-
-
-  console.log(data.users)
-
-   emails  = data.users.data.map((obj:any)=> {return obj.email})
+  const updateEmails = () => {
+    createDocument ({
+      variables: {
+        document: 
+          {
+            fields: [{
+              key: "email",
+              value: email
+            }]
+          } 
+      }
+    })
   }
-  if(error) {
-    console.log(error);
-    return "error";
-  }
 
+  const [displaymessage, setDisplayMessage] = useState("")
+
+    const[filterQuery]= useLazyQuery(FIND_EMAIL, {
+      onCompleted:( data) => {
+       if (data.documents.length >0){ 
+        setDisplayMessage('This email has been registered already');
+      }
+      else {
+        updateEmails()
+      }
+    }
+}
+    )
+   
 
   // closing button
 
@@ -36,25 +49,27 @@ const FirstPurchase = () => {
 
   useEffect(() => {
 
-    setTimeout(()=> {setOpenModal(true)}, 5000)
+    setTimeout(()=> {setOpenModal(true)}, 2000);
+    
   }, [])
 
-  // const arr = emailsList.users.data.map((obj:any)=> {return obj.id})
 
- console.log('dssssssss', emails)
-
+ 
 
 
- const [displaymessage, setDisplayMessage] = useState("")
 
- const validateEmail = () => {
-  if (emails.includes(email)) {
 
-    setDisplayMessage('use another one')}
-  else {
-     setDisplayMessage('Success')
-  }
- }
+
+
+
+const checkQuery = (emailValue: string) => {
+  filterQuery({
+    variables: {
+      email:`email=${emailValue.toLowerCase()}`
+      
+    }
+  })
+}
 
   const contentStyle = { background: 'rgba(255,255,255,0.5)' };
   const overlayStyle = { background: 'rgba(0,0,0,0.5)' };
@@ -62,8 +77,7 @@ const FirstPurchase = () => {
 
   const onSubmit = (e:any) => {
     e.preventDefault();
-    validateEmail();
-    console.log(email)
+    checkQuery(email)
   }
 
   return <div>
@@ -83,7 +97,9 @@ const FirstPurchase = () => {
      }}>
       X
       </button>
-    <form onSubmit={onSubmit}
+    <form onSubmit={
+      onSubmit
+    }
 
       style={{
        border: "1px solid black"

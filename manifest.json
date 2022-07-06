@@ -11,7 +11,7 @@
     "store": "0.x"
   },
   "dependencies": {
-    "vtex.admin-customers-graphql": "3.x"
+    "vtex.store-graphql": "2.x"
   },
   "registries": [
     "smartcheckout"
