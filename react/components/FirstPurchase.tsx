@@ -2,128 +2,102 @@ import React, { useState, useEffect } from 'react'
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import './styles.css'
- import FIND_EMAIL from '../graphql/getEmails.graphql'
- import UPDATE_EMAILS from '../graphql/updateEmails.graphql'
- import { useLazyQuery, useMutation} from 'react-apollo'
+import { useCssHandles } from 'vtex.css-handles'
+import EmailForm from './EmailForm';
 
 
-
-const FirstPurchase = () => {
-
-  const [email, setEmail] = useState("")
-
-  const [createDocument] = useMutation(UPDATE_EMAILS)
-
-  const updateEmails = () => {
-    createDocument ({
-      variables: {
-        document: 
-          {
-            fields: [{
-              key: "email",
-              value: email
-            }]
-          } 
-      }
-    })
-  }
-
-  const [displaymessage, setDisplayMessage] = useState("")
-
-    const[filterQuery]= useLazyQuery(FIND_EMAIL, {
-      onCompleted:( data) => {
-       if (data.documents.length >0){ 
-        setDisplayMessage('This email has been registered already');
-      }
-      else {
-        updateEmails()
-      }
-    }
+type Props = {
+  backgroundImage: string
+  popupText: string
 }
-    )
-   
 
-  // closing button
+const FirstPurchase = ({
+  backgroundImage,
+  popupText
+}: Props) => {
 
   const [openModal, setOpenModal] = useState(false)
 
   useEffect(() => {
-
     setTimeout(()=> {setOpenModal(true)}, 2000);
-    
   }, [])
 
+  const CSS_HANDLES = [
+   'close__button',
+   'main__container',
+   'text',
+   'form__container'
+  ]
 
- 
-
-
-
-
-
-
-
-const checkQuery = (emailValue: string) => {
-  filterQuery({
-    variables: {
-      email:`email=${emailValue.toLowerCase()}`
-      
-    }
-  })
-}
+  const handles = useCssHandles(CSS_HANDLES)
 
   const contentStyle = { background: 'rgba(255,255,255,0.5)' };
   const overlayStyle = { background: 'rgba(0,0,0,0.5)' };
   const arrowStyle = { color: '#000' }
 
-  const onSubmit = (e:any) => {
-    e.preventDefault();
-    checkQuery(email)
-  }
-
+  
   return <div>
     <Popup open = {openModal} position="right center"
-    {...{   contentStyle, overlayStyle, arrowStyle }}
-    modal>
+    {...{   contentStyle, overlayStyle, arrowStyle }} modal>
+
     <div
+      className={handles.main__container}
       style={{
-        height: "200px",
-        width: "300px",
-        borderRadius: "10px"
+        height: "350px",
+        width: "350px",
+        borderRadius: "10px",
+        backgroundImage: `url(${backgroundImage})`
       }}>
 
      <button onClick={()=>{ setOpenModal(false) }}
+     className={handles.close__button}
      style= {{
-
+      position: "absolute",
+      right: "1px",
+      top: "1px",
      }}>
       X
       </button>
-    <form onSubmit={
-      onSubmit
-    }
-
+      <div className={handles.form__container}
       style={{
-       border: "1px solid black"
-      }}>
-
-<div>
-      <input onChange={(e) => {setEmail(e.target.value)}}
-        type="email"
-        name="email"
-        placeholder="Email"
-        pattern="[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-        title="No se permiten caracteres especiales"
-        required
-      />
-    </div>
-    <div>
-      <button >Submit Contact</button>
-    </div>
-</form>
-<p>{displaymessage}</p>
+        position: "absolute",
+        bottom: "20px",
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column",
+        left: "20px"
+      }}
+      >
+        <h3 className={handles.text}>{popupText}</h3>
+      <EmailForm  setOpenModal= {setOpenModal} />
+      </div>
     </div>
     </Popup>
   </div>
 
+
+}
+
+FirstPurchase.schema = {
+  title: "Popup",
+  type: "object",
+  properties: {
+    backgroundImage: {
+      title: "Upload image",
+      type: 'string',
+      widget : {
+        "ui:widget": "image-uploader"
+      }
+    },
+
+    popupText: {
+      title: "popup text",
+      type: 'string',
+      widget : {
+        "ui:widget": "textarea"
+      }
+    }
+}
 
 }
 
