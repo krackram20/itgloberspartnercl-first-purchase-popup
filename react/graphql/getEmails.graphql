@@ -2,7 +2,7 @@
 query ($email:String){ 
   documents(
     acronym:"CL",
-    fields:["email"],
+    fields:["id","email"],
     where: $email
   ) {
     id,

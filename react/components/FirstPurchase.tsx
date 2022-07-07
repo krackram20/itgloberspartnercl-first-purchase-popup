@@ -11,67 +11,76 @@ type Props = {
   popupText: string
 }
 
-const FirstPurchase = ({
-  backgroundImage,
-  popupText
-}: Props) => {
-
-  const [openModal, setOpenModal] = useState(false)
-
-  useEffect(() => {
-    setTimeout(()=> {setOpenModal(true)}, 2000);
-  }, [])
+const FirstPurchase = ({ backgroundImage, popupText }: Props) => {
 
   const CSS_HANDLES = [
-   'close__button',
-   'main__container',
-   'text',
-   'form__container'
+    'close__button',
+    'main__container',
+    'text',
+    'form__container'
   ]
-
   const handles = useCssHandles(CSS_HANDLES)
 
+  //popup styles
   const contentStyle = { background: 'rgba(255,255,255,0.5)' };
   const overlayStyle = { background: 'rgba(0,0,0,0.5)' };
   const arrowStyle = { color: '#000' }
 
-  
+  const [openPopUp, setOpenPopUp] = useState(false)
+
+  //Using local storage to avoid render in case the close button is clicked
+  const closedWindow = localStorage.getItem('neverShowAgain')
+
+  useEffect(() => {
+    if (closedWindow === 'true') {
+      setOpenPopUp(false)
+    } else {
+      setTimeout(() => { setOpenPopUp(true) }, 2000);
+    }
+  }, [])
+
+  const handleClose = () => {
+    setOpenPopUp(false)
+    localStorage.setItem('neverShowAgain', 'true')
+  }
+
   return <div>
-    <Popup open = {openModal} position="right center"
-    {...{   contentStyle, overlayStyle, arrowStyle }} modal>
+    <Popup open={openPopUp} position="right center"
+      {...{ contentStyle, overlayStyle, arrowStyle }} >
 
-    <div
-      className={handles.main__container}
-      style={{
-        height: "350px",
-        width: "350px",
-        borderRadius: "10px",
-        backgroundImage: `url(${backgroundImage})`
-      }}>
-
-     <button onClick={()=>{ setOpenModal(false) }}
-     className={handles.close__button}
-     style= {{
-      position: "absolute",
-      right: "1px",
-      top: "1px",
-     }}>
-      X
-      </button>
-      <div className={handles.form__container}
-      style={{
-        position: "absolute",
-        bottom: "20px",
-        display: "flex",
-        alignItems: "center",
-        flexDirection: "column",
-        left: "20px"
-      }}
-      >
-        <h3 className={handles.text}>{popupText}</h3>
-      <EmailForm  setOpenModal= {setOpenModal} />
+      <div
+        className={handles.main__container}
+        style={{
+          height: "350px",
+          width: "350px",
+          borderRadius: "10px",
+          backgroundImage: `url(${backgroundImage})`
+        }}>
+        <button onClick={handleClose}
+          className={handles.close__button}
+          style={{
+            position: "absolute",
+            right: "1px",
+            top: "1px",
+          }}>
+          X
+        </button>
+        <div className={handles.form__container}
+          style={{
+            position: "absolute",
+            bottom: "20px",
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            left: "20px"
+          }}
+        >
+          <h3 className={handles.text}>
+            {popupText}
+          </h3>
+          <EmailForm setOpenPopUp={setOpenPopUp} />
+        </div>
       </div>
-    </div>
     </Popup>
   </div>
 
@@ -85,7 +94,7 @@ FirstPurchase.schema = {
     backgroundImage: {
       title: "Upload image",
       type: 'string',
-      widget : {
+      widget: {
         "ui:widget": "image-uploader"
       }
     },
@@ -93,11 +102,11 @@ FirstPurchase.schema = {
     popupText: {
       title: "popup text",
       type: 'string',
-      widget : {
+      widget: {
         "ui:widget": "textarea"
       }
     }
-}
+  }
 
 }
 

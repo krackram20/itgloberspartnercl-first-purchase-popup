@@ -1,115 +1,108 @@
-import React, {  useState } from 'react'
+import React, { useState } from 'react'
 import { useCssHandles } from 'vtex.css-handles'
 import FIND_EMAIL from '../graphql/getEmails.graphql'
 import UPDATE_EMAILS from '../graphql/updateEmails.graphql'
 import { useLazyQuery, useMutation } from 'react-apollo'
 
 type Props = {
-  setOpenModal: any
+  setOpenPopUp: any
 }
 
-const EmailForm = ({setOpenModal}: Props) => {
-    
-    const [email, setEmail] = useState("")
+const EmailForm = ({ setOpenPopUp }: Props) => {
 
-    const [emailMessage, setEmailMessage] = useState("")
+  const CSS_HANDLES = [
+    'submit__button',
+    'message'
+  ]
 
-    const [createDocument] = useMutation(UPDATE_EMAILS, {
-      
-      onCompleted:()=>setEmailMessage('Email successfully registered'),
-      onError: (error) =>
-      console.log(error)})
+  const handles = useCssHandles(CSS_HANDLES)
 
-    
+  const [email, setEmail] = useState('')
 
-    const updateEmails = () => { 
-        createDocument ({
-          variables: {
-              document: 
-              {
-              fields: [{key: "email",value: email}]
-              } 
-            }
-          })
-      }
-     
-    const [ filterQuery ] = useLazyQuery(FIND_EMAIL, {
-        onCompleted:(data) => {
-            if (data?.documents.length > 0){ 
-                setEmailMessage('This email has been registered already');  
-                console.log(data?.documents.length);   
-            }
-            else {
-                updateEmails();   
-                setTimeout(
-                 ()=> {setOpenModal(false)}, 1000
-                )  
-            }
+  const [submitMessage, setSubmitMessage] = useState('')
+
+  const [createDocument] = useMutation(UPDATE_EMAILS, {
+    onCompleted: () =>
+      setSubmitMessage('Email successfully registered'),
+    onError: (error) =>
+      console.log(error)
+  })
+
+  const updateEmails = () => {
+    createDocument({
+      variables: {
+        document:
+        {
+          fields: [{ key: 'email', value: email }]
         }
-    }
-        )
-
-    const checkQuery = (emailValue: string) => {
-        filterQuery({
-          variables: {
-            email:`email=${emailValue}` 
-          }
-        });
-        console.log(emailValue);
-        
       }
+    });
 
-    const onSubmit = (evt:any) => {
-        evt.preventDefault();
-        checkQuery(email)
-        console.log('holi');
+    setTimeout(() => { setOpenPopUp(false) }, 1000);
+
+    localStorage.setItem('neverShowAgain', 'true')
+  }
+
+  const [filterQuery] = useLazyQuery(FIND_EMAIL, {
+    onCompleted: (data) => {
+      if (data?.documents.length > 0) {
+        setSubmitMessage('This email has been registered already');
+      }
+      else {
+        updateEmails();
+      }
     }
+  }
+  )
 
-      const CSS_HANDLES = [
-        'submit__button',
-        'message'
-       ]
-     
-       const handles = useCssHandles(CSS_HANDLES)
+  const checkQuery = (emailValue: string) => {
+    filterQuery({
+      variables: {
+        email: `email=${emailValue}`
+      }
+    })
 
- return   (
-    <div  
-    style={{
-        display: "flex",
-        flexDirection: "column"
-        
-    }}
-    >
-   <form onSubmit={onSubmit}
+  }
+
+  const onSubmit = (evt: any) => {
+    evt.preventDefault();
+    checkQuery(email)
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+      <form onSubmit={onSubmit}
         style={{
-             display: "flex"
-             
+          display: 'flex'
         }}>
-            <div>
-                <input onChange={(e) => {setEmail(e.target.value)}}
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    pattern="[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-                    required />
-            </div>
-       <div>
-           <button className={handles.submit__button} >
-                Submit
-            </button>
+        <div>
+          <input onChange={(e) => { setEmail(e.target.value) }}
+            type="email"
+            name="email"
+            placeholder="Email"
+            pattern="[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+            required />
+        </div>
+        <div>
+          <button className={handles.submit__button} >
+            Submit
+          </button>
         </div>
       </form>
       <p
-      style={{
-        color: 'red',
-        fontWeight: "bold"
-      }}
-      className={handles.message}>
-        {emailMessage}
+        style={{
+          color: 'red',
+          fontWeight: "bold"
+        }}
+        className={handles.message}>
+        {submitMessage}
       </p>
     </div>
-    
- )
+  )
 }
 
-export default  EmailForm
+export default EmailForm
