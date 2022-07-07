@@ -1,8 +1,8 @@
 
-query ($email:String){ 
+query ($email:String){
   documents(
     acronym:"CL",
-    fields:["id","email"],
+    fields:["email"],
     where: $email
   ) {
     id,

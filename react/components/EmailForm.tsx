@@ -24,8 +24,8 @@ const EmailForm = ({ setOpenPopUp }: Props) => {
   const [createDocument] = useMutation(UPDATE_EMAILS, {
     onCompleted: () =>
       setSubmitMessage('Email successfully registered'),
-    onError: (error) =>
-      console.log(error)
+    onError: () =>
+      console.log('Try again later')
   })
 
   const updateEmails = () => {
